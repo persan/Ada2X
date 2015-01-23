@@ -1,8 +1,13 @@
 with "asis.gpr";
-with "aws.gpr";
+--  with "aws.gpr";
 library project Ada2X is
-    for Source_Dirs use ("src");
-    for Object_Dir use ".obj/" & project'name;
-    for Library_Name use "fore";
-    for Library_Dir use "lib";
+   for Source_Dirs use ("src");
+   for Object_Dir use ".obj/" & project'Name;
+   for Library_Name use "ada2x";
+   for Library_Dir use "lib";
+
+   package Compiler is
+      for Default_Switches ("ada") use ("-gnatwa", "-gnatf", "-gnatQ", "-gnateE","-gnatf");
+   end Compiler;
+
 end Ada2X;

@@ -17,10 +17,10 @@
 ------------------------------------------------------------------------------
 
 with Asis;
-
+with interfaces.c;
 package Ada2X is
 
-   Version : constant String := "1.3.1";
+   Version : constant String := "0.0.0";
 
    Fatal_Error     : exception;
    --  Raised when a non-recoverable error has been found
@@ -39,5 +39,13 @@ package Ada2X is
       Message : String) with No_Return;
    --  Raises Spec_Error exception with the given message. Add a source
    --  location information for entity E.
+
+   type Unsigned_Long is mod 2 ** 64;
+   type Unsigned_Int is mod 2 ** 32;
+   type Unsigned_Short is mod 2 ** 16;
+   type Unsigned_Byte is mod 2 ** 8;
+
+   subtype Byte is Short_Short_Integer;
+   subtype Short is Interfaces.C.Short;
 
 end Ada2X;

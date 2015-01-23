@@ -23,18 +23,18 @@ with Ada.Text_IO;
 
 with GNAT.Command_Line;
 
-with AWS.Utils;
 
 with Ada2X.Generator;
 with Ada2X.Options;
 with Ada2X.Parser;
+with Ada.Directories;
 
 procedure Ada2X.Main is
 
    use Ada;
    use Ada.Exceptions;
    use Ada.Strings.Unbounded;
-
+   use Ada.Directories;
    procedure Usage;
    --  Display usage string
 
@@ -63,8 +63,8 @@ procedure Ada2X.Main is
             when 't' =>
                Options.Tree_File_Path :=
                  To_Unbounded_String
-                   (AWS.Utils.Normalized_Directory
-                        (GNAT.Command_Line.Parameter));
+                   (Ada.Directories.Full_Name(
+                        (GNAT.Command_Line.Parameter)));
 
 
             when 's' =>
@@ -192,7 +192,7 @@ begin
    declare
       Filename : constant String := To_String (Options.WSDL_File_Name);
    begin
-      if AWS.Utils.Is_Regular_File (Filename)
+      if Kind (Filename) = Ordinary_File
         and then not Options.Overwrite_WSDL
       then
          Text_IO.Put_Line

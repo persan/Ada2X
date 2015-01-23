@@ -25,18 +25,13 @@ with Ada.Text_IO;
 
 with GNAT.Calendar.Time_IO;
 
-with AWS.Utils;
-with SOAP.Name_Space;
-with SOAP.Types;
-with SOAP.WSDL;
-
+with Ada2X.Utils;
 with Ada2X.Options;
 
 package body Ada2X.Generator is
 
    use Ada;
    use Ada.Strings.Unbounded;
-   use SOAP;
 
    --  Data structure for API's description
 
@@ -84,7 +79,7 @@ package body Ada2X.Generator is
    Schema_Needed : Boolean := False;
    --  Set to True if a WSDL schema is to be writed
 
-   Character_Schema : Boolean := False;
+   Character_Schema : constant Boolean := False;
    --  Set to Trus if a WSDL Character schema must be generated
 
    package NS_Maps is new Ada.Containers.Indefinite_Hashed_Maps
@@ -97,6 +92,7 @@ package body Ada2X.Generator is
    --  Insert a new namespace value into Name_Spaces table
 
    function NS_Prefix (Value : String) return String;
+   pragma Unreferenced (NS_Prefix);
    --  Returns the name space prefix for the given name space value
 
    function "+" (S : String) return Unbounded_String
@@ -218,7 +214,6 @@ package body Ada2X.Generator is
    ---------------
 
    function NS_Prefix (Value : String) return String is
-      use AWS;
    begin
       if Value = "" then
          return "tns";
@@ -369,7 +364,7 @@ package body Ada2X.Generator is
             --  An unconstrained array
             Text_IO.Put ("<>");
          else
-            Text_IO.Put (AWS.Utils.Image (Length));
+            Text_IO.Put (Utils.Image (Length));
          end if;
          Text_IO.Put (")");
          Text_IO.Set_Col (22);
@@ -454,31 +449,9 @@ package body Ada2X.Generator is
    ------------
 
    function To_XSD (NS, Ada_Type : String) return String is
-      P        : WSDL.Parameter_Type;
-      Standard : Boolean;
    begin
       Insert_NS (NS);
-
-      if Ada_Type = "character" then
-         Character_Schema := True;
-         return NS_Prefix
-           (Name_Space.Value (Name_Space.AWS) & "Standard_pkg/")
-           & ":Character";
-
-      elsif Ada_Type = "SOAP_Base64" then
-         return Types.XML_Base64_Binary;
-      end if;
-
-      WSDL.From_Ada (Ada_Type, P, Standard);
-
-      if Standard then
-         return WSDL.To_XSD (P);
-
-      else
-         --  We suppose here that this is a composite type (record/array)
-         --  and that a corresponding entry will be found in the schema.
-         return NS_Prefix (NS) & ':' & Ada_Type;
-      end if;
+      return Ada_Type;
    end To_XSD;
 
    -----------------
@@ -512,9 +485,7 @@ package body Ada2X.Generator is
 
       WS_Name : constant String := -Options.WS_Name;
 
-      NS      : constant String :=
-                  SOAP.Name_Space.Value
-                    (SOAP.Name_Space.AWS) & WS_Name & "_def/";
+      NS      : constant String := WS_Name & "_def/";
 
       procedure Write_Header;
       --  Write WSDL header
@@ -616,7 +587,6 @@ package body Ada2X.Generator is
       ------------------
 
       procedure Write_Header is
-         use AWS;
          P : NS_Maps.Cursor;
          N : Positive;
       begin
@@ -624,11 +594,6 @@ package body Ada2X.Generator is
          Put_Line ("<wsdl:definitions name=""" & WS_Name  & """");
          Put_Line ("   targetNamespace=""" & NS & '"');
          Put_Line ("   xmlns:tns=""" & NS & '"');
-         Put_Line ("   xmlns:soap=""" & WSDL.NS_SOAP & '"');
-         Put_Line ("   xmlns:soapenc=""" & WSDL.NS_SOAPENC & '"');
-         Put_Line ("   xmlns:wsdl=""" & WSDL.NS_WSDL & '"');
-         Put_Line ("   xmlns:xsi=""" & WSDL.NS_XSI & '"');
-         Put ("   xmlns:xsd=""" & WSDL.NS_XSD & '"');
 
          --  Write all name spaces
 
@@ -812,7 +777,7 @@ package body Ada2X.Generator is
                       & " wsdl:arrayType=""" & (-E.Parameters.XSD_Name)
                       & (if E.Length = 0
                          then "[]"
-                         else "[" & AWS.Utils.Image (E.Length) & "]")
+                         else "[" & Utils.Image (E.Length) & "]")
                       & """/>");
             Put_Line ("               </xsd:restriction>");
             Put_Line ("            </xsd:complexContent>");
@@ -827,9 +792,7 @@ package body Ada2X.Generator is
          begin
             New_Line;
             Put_Line ("         <xsd:simpleType name=""Character""");
-            Put_Line ("                 targetNamespace="""
-                      & Name_Space.Value (Name_Space.AWS)
-                      & "Standard_pkg/" & """>");
+            Put_Line ("                 targetNamespace=""Standard_pkg/" & """>");
             Put_Line ("            <xsd:restriction base=""xsd:string"">");
             Put_Line ("               <xsd:length value=""1""/>");
             Put_Line ("            </xsd:restriction>");

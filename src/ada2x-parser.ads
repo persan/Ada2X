@@ -18,8 +18,6 @@
 
 package Ada2X.Parser is
 
-   Fatal_Error     : exception renames Ada2X.Fatal_Error;
-   Parameter_Error : exception renames Ada2X.Parameter_Error;
 
    procedure Initialize;
    --  Reads and checks the command line parameters and initializes the

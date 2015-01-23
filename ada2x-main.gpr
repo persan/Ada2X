@@ -11,5 +11,13 @@ project Ada2X.Main is
       for Default_Switches ("ada") use ("-E");
    end Binder;
 
+   package Builder is
+      for Default_Switches ("ada") use ("-k", "-j0", "-s");
+   end Builder;
+
+   package Compiler is
+      for Default_Switches ("ada") use Ada2X.Compiler'Default_Switches ("ada");
+   end Compiler;
+
 end Ada2X.Main;
 

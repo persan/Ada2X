@@ -26,7 +26,7 @@ with Ada.Strings.Maps;
 with Ada.Strings.Unbounded;
 with Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
-
+with Ada2X.Utils;
 with GNAT.OS_Lib;
 
 with Asis;
@@ -45,9 +45,6 @@ with Asis.Text;
 
 with A4G.GNAT_Int;
 
-with AWS.Utils;
-with SOAP.Name_Space;
-with SOAP.Types;
 
 with Ada2X.Generator;
 with Ada2X.Options;
@@ -965,7 +962,7 @@ package body Ada2X.Parser is
                end if;
             end loop;
 
-            return SOAP.Name_Space.Value (SOAP.Name_Space.AWS) & Res & "_pkg/";
+            return Res & "_pkg/";
          end;
       end Name_Space;
 
@@ -982,7 +979,7 @@ package body Ada2X.Parser is
          function Compute_Value
            (V : Asis.Expression) return Long_Long_Integer;
          function Compute_Value
-           (V : Asis.Expression) return SOAP.Types.Unsigned_Long;
+           (V : Asis.Expression) return Unsigned_Long;
          --  Retruns the computed value for the given expression. This is
          --  supposed to be a simple expression for a range declaration:
          --  range -2**5 .. 2**7 or mod 2**15;
@@ -1026,17 +1023,17 @@ package body Ada2X.Parser is
          end Compute_Value;
 
          function Compute_Value
-           (V : Asis.Expression) return SOAP.Types.Unsigned_Long
+           (V : Asis.Expression) return Unsigned_Long
          is
-            use type SOAP.Types.Unsigned_Long;
+            use type Unsigned_Long;
             VI     : constant String := Image (Text.Element_Image (V));
             E      : constant Natural := Strings.Fixed.Index (VI, "**");
-            N      : SOAP.Types.Unsigned_Long;
-            N1, N2 : SOAP.Types.Unsigned_Long;
+            N      : Unsigned_Long;
+            N1, N2 : Unsigned_Long;
 
          begin
-            N1 := SOAP.Types.Unsigned_Long'Value (VI (VI'First .. E - 1));
-            N2 := SOAP.Types.Unsigned_Long'Value (VI (E + 2 .. VI'Last));
+            N1 := Unsigned_Long'Value (VI (VI'First .. E - 1));
+            N2 := Unsigned_Long'Value (VI (E + 2 .. VI'Last));
 
             N := N1;
             for K in 1 .. N2 - 1 loop
@@ -1128,30 +1125,27 @@ package body Ada2X.Parser is
 
                if Base then
                   declare
-                     use type SOAP.Types.Unsigned_Long;
+                     use type Unsigned_Long;
                      Mod_Node : constant Asis.Expression :=
                                   Definitions.Mod_Static_Expression (E);
-                     Modulus  : SOAP.Types.Unsigned_Long;
+                     Modulus  : Unsigned_Long;
                   begin
                      if Flat_Element_Kind (Mod_Node) = A_Function_Call then
                         Modulus := Compute_Value (Mod_Node);
                      else
-                        Modulus := SOAP.Types.Unsigned_Long'Value
+                        Modulus := Unsigned_Long'Value
                           (Image (Expressions.Value_Image (Mod_Node)));
                      end if;
 
-                     if Modulus < SOAP.Types.Unsigned_Long
-                       (SOAP.Types.Unsigned_Byte'Modulus)
+                     if Modulus < Unsigned_Long (Unsigned_Byte'Modulus)
                      then
                         return "unsigned_byte";
 
-                     elsif Modulus < SOAP.Types.Unsigned_Long
-                       (SOAP.Types.Unsigned_Short'Modulus)
+                     elsif Modulus < Unsigned_Long (Unsigned_Short'Modulus)
                      then
                         return "unsigned_short";
 
-                     elsif Modulus < SOAP.Types.Unsigned_Long
-                       (SOAP.Types.Unsigned_Int'Modulus)
+                     elsif Modulus < Unsigned_Long (Unsigned_Int'Modulus)
                      then
                         return "unsigned_int";
 
@@ -1193,14 +1187,14 @@ package body Ada2X.Parser is
                           (Image (Expressions.Value_Image (UB)));
                      end if;
 
-                     if Ilb >= Long_Long_Integer (SOAP.Types.Byte'First)
-                       and then Iub <= Long_Long_Integer (SOAP.Types.Byte'Last)
+                     if Ilb >= Long_Long_Integer (Byte'First)
+                       and then Iub <= Long_Long_Integer (Byte'Last)
                      then
                         return "byte";
 
-                     elsif Ilb >= Long_Long_Integer (SOAP.Types.Short'First)
+                     elsif Ilb >= Long_Long_Integer (Short'First)
                        and then
-                         Iub <= Long_Long_Integer (SOAP.Types.Short'Last)
+                         Iub <= Long_Long_Integer (Short'Last)
                      then
                         return "short";
 
@@ -1645,7 +1639,6 @@ package body Ada2X.Parser is
    -----------
 
    function Image (Str : Wide_String) return String is
-      use AWS;
    begin
       return Strings.Fixed.Trim
         (Characters.Conversions.To_String (Str),

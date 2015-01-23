@@ -16,22 +16,17 @@
 --  to http://www.gnu.org/licenses for a complete copy of the license.      --
 ------------------------------------------------------------------------------
 
-with Ada.Characters.Conversions;
-with Ada.Characters.Handling;
 with Ada.Exceptions;
-with Ada.Strings.Fixed;
 
 with Asis.Declarations;
 with Asis.Elements;
 with Asis.Text;
-
-with AWS.Utils;
+with Ada2X.Utils;
 
 package body Ada2X is
 
    use Ada;
    use Asis;
-   use AWS;
 
    --------------
    -- Location --
@@ -39,19 +34,6 @@ package body Ada2X is
 
    function Location (E : Asis.Element) return String is
 
-      function Image (Str : Wide_String) return String;
-      --  Return Str as a lower-case and trimmed string
-
-      -----------
-      -- Image --
-      -----------
-
-      function Image (Str : Wide_String) return String is
-      begin
-         return Characters.Handling.To_Lower
-           (Strings.Fixed.Trim
-              (Characters.Conversions.To_String (Str), Strings.Both));
-      end Image;
 
       E_Span    : constant Text.Span := Text.Element_Span (E);
       Unit      : constant Asis.Declaration :=
@@ -62,7 +44,7 @@ package body Ada2X is
       Unit_Name : constant Asis.Element := Declarations.Names (Unit) (1);
       --  Unit name
    begin
-      return Image (Text.Element_Image (Unit_Name)) & ".ads:"
+      return Utils.Image (Text.Element_Image (Unit_Name)) & ".ads:"
         & Utils.Image (E_Span.First_Line)
         & ':' & Utils.Image (E_Span.First_Column);
    end Location;
